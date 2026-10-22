@@ -1,0 +1,23 @@
+## .NET
+**/bin/
+**/obj/
+.vs/
+*.user
+*.suo
+
+## Local configuration and secrets
+.env
+.env.*
+!.env.example
+**/appsettings.Local.json
+
+## Test and coverage output
+TestResults/
+coverage/
+__pycache__/
+
+## IDE and OS files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

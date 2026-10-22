@@ -1,0 +1,113 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Quality and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+
+      - name: Restore local tools
+        run: dotnet tool restore
+
+      - name: Restore solution
+        run: dotnet restore TaskManager.slnx
+
+      - name: Verify formatting
+        run: dotnet format TaskManager.slnx --verify-no-changes --no-restore
+
+      - name: Build Release
+        run: dotnet build TaskManager.slnx -c Release --no-restore
+
+  unit-tests:
+    name: Unit tests
+    needs: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+
+      - name: Run unit tests
+        run: dotnet test tests/TaskManager.UnitTests/TaskManager.UnitTests.csproj -c Release --logger "trx;LogFileName=unit-tests.trx" --collect:"XPlat Code Coverage"
+
+      - name: Verify unit test discovery
+        run: python3 .github/scripts/verify-trx-tests.py tests/TaskManager.UnitTests/TestResults/unit-tests.trx
+
+      - name: Upload unit test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-results
+          path: tests/TaskManager.UnitTests/TestResults/**/*
+          if-no-files-found: warn
+
+  integration-tests:
+    name: Integration tests (PostgreSQL)
+    needs: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: task_manager_test
+          POSTGRES_USER: task_manager_test
+          POSTGRES_PASSWORD: task_manager_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U task_manager_test -d task_manager_test"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    env:
+      ConnectionStrings__DefaultConnection: Host=localhost;Port=5432;Database=task_manager_test;Username=task_manager_test;Password=task_manager_test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+
+      - name: Run integration tests
+        run: dotnet test tests/TaskManager.IntegrationTests/TaskManager.IntegrationTests.csproj -c Release --logger "trx;LogFileName=integration-tests.trx" --collect:"XPlat Code Coverage"
+
+      - name: Verify integration test discovery
+        run: python3 .github/scripts/verify-trx-tests.py tests/TaskManager.IntegrationTests/TestResults/integration-tests.trx
+
+      - name: Upload integration test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-test-results
+          path: tests/TaskManager.IntegrationTests/TestResults/**/*
+          if-no-files-found: warn
