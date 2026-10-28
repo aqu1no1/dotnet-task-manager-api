@@ -15,14 +15,8 @@ public class TaskItem
     {
         Title = ValidateTitle(title);
         Description = ValidateDescription(description);
-
-        if (!Enum.IsDefined(priority))
-        {
-            throw new ArgumentOutOfRangeException(nameof(priority));
-        }
-
+        Priority = ValidatePriority(priority);
         Id = Guid.NewGuid();
-        Priority = priority;
         Status = TaskItemStatus.Pending;
         DueDate = dueDate?.ToUniversalTime();
         CreatedAt = createdAt.ToUniversalTime();
@@ -97,6 +91,29 @@ public class TaskItem
         UpdatedAt = occurredAt.ToUniversalTime();
     }
 
+    public void UpdateDetails(
+        string title,
+        TaskPriority priority,
+        DateTimeOffset occurredAt,
+        string? description = null,
+        DateTimeOffset? dueDate = null)
+    {
+        if (IsArchived || Status is TaskItemStatus.Completed or TaskItemStatus.Cancelled)
+        {
+            throw new InvalidOperationException("Only pending or in-progress tasks can be updated.");
+        }
+
+        var validatedTitle = ValidateTitle(title);
+        var validatedDescription = ValidateDescription(description);
+        var validatedPriority = ValidatePriority(priority);
+
+        Title = validatedTitle;
+        Description = validatedDescription;
+        Priority = validatedPriority;
+        DueDate = dueDate?.ToUniversalTime();
+        UpdatedAt = occurredAt.ToUniversalTime();
+    }
+
     private static string ValidateTitle(string title)
     {
         var normalizedTitle = title?.Trim();
@@ -117,5 +134,15 @@ public class TaskItem
         }
 
         return description;
+    }
+
+    private static TaskPriority ValidatePriority(TaskPriority priority)
+    {
+        if (!Enum.IsDefined(priority))
+        {
+            throw new ArgumentOutOfRangeException(nameof(priority));
+        }
+
+        return priority;
     }
 }
