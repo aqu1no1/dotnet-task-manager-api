@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Task Manager">
+  <title>Task Manager</title>
+  <style>
+    .ink { stroke-dasharray: 28; stroke-dashoffset: 0; animation: ink 4.5s ease-in-out infinite; }
+    .done { stroke-dasharray: 15; stroke-dashoffset: 0; animation: done 4.5s ease-out infinite; }
+    .pen { animation: pen 4.5s ease-in-out infinite; }
+    @keyframes ink {
+      0%, 10% { stroke-dashoffset: 28; opacity: 1; }
+      45%, 90% { stroke-dashoffset: 0; opacity: 1; }
+      100% { stroke-dashoffset: 0; opacity: 0; }
+    }
+    @keyframes done {
+      0%, 58% { stroke-dashoffset: 15; opacity: 1; }
+      68%, 90% { stroke-dashoffset: 0; opacity: 1; }
+      100% { stroke-dashoffset: 0; opacity: 0; }
+    }
+    @keyframes pen {
+      0% { transform: translate(-14px, -6px); }
+      10% { transform: translate(-14px, 0); }
+      20% { transform: translate(-10px, -1.5px); }
+      30% { transform: translate(-7px, 0); }
+      38% { transform: translate(-3px, -1.5px); }
+      45% { transform: translate(0, 0); }
+      55%, 85% { transform: translate(5px, -7px); }
+      100% { transform: translate(-14px, -6px); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .ink, .done, .pen { animation: none; }
+    }
+  </style>
+  <rect width="128" height="128" rx="28" fill="#4338CA"/>
+  <rect x="28" y="22" width="64" height="84" rx="10" fill="#312E81"/>
+  <rect x="35" y="32" width="50" height="66" rx="4" fill="#FFFFFF"/>
+  <rect x="46" y="15" width="28" height="14" rx="6" fill="#E0E7FF"/>
+  <circle cx="60" cy="20.5" r="2.5" fill="#312E81"/>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M41 45l3.5 3.5 6.5-6.5" stroke="#4338CA" stroke-width="3.5"/>
+    <path d="M56 46h22" stroke="#C7D2FE" stroke-width="4"/>
+    <path d="M41 59l3.5 3.5 6.5-6.5" stroke="#4338CA" stroke-width="3.5"/>
+    <path d="M56 60h17" stroke="#C7D2FE" stroke-width="4"/>
+    <path class="done" d="M41 75l3.5 3.5 6.5-6.5" stroke="#4338CA" stroke-width="3.5"/>
+    <path class="ink" d="M56 76q2.3-5 4.7 0t4.7 0t4.6 0" stroke="#4338CA" stroke-width="3"/>
+  </g>
+  <g class="pen">
+    <path d="M80 66L106 40" stroke="#F59E0B" stroke-width="10"/>
+    <path d="M106 40L110 36" stroke="#1E1B4B" stroke-width="10" stroke-linecap="round"/>
+    <polygon points="83.5,69.5 76.5,62.5 70,76" fill="#FDE68A"/>
+    <polygon points="74.7,73.7 72.3,71.3 70,76" fill="#1E1B4B"/>
+  </g>
+</svg>
